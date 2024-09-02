@@ -16,6 +16,7 @@ import { capitalize } from "@/hooks/useCapitalize";
 import axios from "axios";
 import { PokemonEvolution } from "@/components/PokemonEvolution";
 import { add, remove, getById } from "@/databases";
+import { useToast } from "@/context/toastContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "pokemon_stats">;
 
@@ -43,6 +44,8 @@ export default function PokemonStats({ route, navigation }: Props) {
   const [about, setAbout] = React.useState<string>("");
   const [evolutions, setEvolutions] = React.useState<EvolutionProps[]>([]);
   const [isMyPokemon, setIsMyPokemon] = React.useState<boolean>(false);
+
+  const { showToast } = useToast();
 
   const pokemon = React.useMemo(() => {
     return { ...route.params.pokemon, imageTypes: route.params.imageTypes };
@@ -78,6 +81,7 @@ export default function PokemonStats({ route, navigation }: Props) {
         return response.data;
       } catch (error) {
         console.log(error);
+        showToast("Error to fetch data");
       }
     },
     []
@@ -165,24 +169,37 @@ export default function PokemonStats({ route, navigation }: Props) {
       }
     } catch (error) {
       console.log(error);
+      showToast("Error to fetch data");
     }
   }, []);
 
   const hanldeAddPokemon = React.useCallback(async () => {
-    await add(pokemon);
-    setIsMyPokemon(true);
+    try {
+      await add(pokemon);
+      setIsMyPokemon(true);
+    } catch (error: any) {
+      showToast(error);
+    }
   }, [pokemon]);
 
   const hanldeDeletePokemon = React.useCallback(async () => {
-    await remove(pokemon.id);
-    setIsMyPokemon(false);
+    try {
+      await remove(pokemon.id);
+      setIsMyPokemon(false);
+    } catch (error: any) {
+      showToast(error);
+    }
   }, [pokemon]);
 
   const hanldeGetPokemon = React.useCallback(async () => {
-    const myPokemon = await getById(pokemon.id);
+    try {
+      const myPokemon = await getById(pokemon.id);
 
-    if (myPokemon !== null && myPokemon !== undefined) {
-      setIsMyPokemon(true);
+      if (myPokemon !== null && myPokemon !== undefined) {
+        setIsMyPokemon(true);
+      }
+    } catch (error: any) {
+      showToast(error);
     }
   }, [pokemon]);
 

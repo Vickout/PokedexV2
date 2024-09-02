@@ -13,6 +13,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { PokemonCard } from "@/components/PokemonCard";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import PokeInput from "@/components/PokeInput";
+import { useToast } from "@/context/toastContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;
 
@@ -20,6 +21,8 @@ export default function Home({ navigation }: Props) {
   const [search, setSearch] = React.useState<string>("");
   const [data, setData] = React.useState<IPokemon>({} as IPokemon);
   const [loading, setLoading] = React.useState<boolean>(false);
+
+  const { showToast } = useToast();
 
   const throttleRequest = onThrottle(async () => {
     setLoading(true);
@@ -37,6 +40,7 @@ export default function Home({ navigation }: Props) {
       }
     } catch (error) {
       console.log(error);
+      showToast("Error to fetch data");
     } finally {
       setLoading(false);
     }

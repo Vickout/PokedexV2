@@ -12,6 +12,7 @@ export const add = async (value: IPokemon) => {
         }
     } catch (error) {
         console.log('error to add ==>', error)
+        throw new Error('Error to add pokemon into list');
     }
 };
 
@@ -24,7 +25,8 @@ export const remove = async (id: number) => {
             await AsyncStorage.setItem('@my-pokemons', JSON.stringify(pokemonRemoved));
         }
     } catch (error) {
-        console.log('error to del ==>', error)
+        console.log('error to del ==>', error);
+        throw new Error('Error to del pokemon from list');
     }
 };
 
@@ -34,6 +36,7 @@ export const getAll = async () => {
         return jsonValue !== null ? JSON.parse(jsonValue) : [];
     } catch (error) {
         console.log('error to get ==>', error)
+        throw new Error('Error to get all pokemons from list');
     }
 };
 
@@ -49,6 +52,7 @@ export const getById = async (id: number) => {
         return null;
     } catch (error) {
         console.log('error to getById ==>', error)
+        throw new Error('Error to get the pokemon from list');
     }
 };
 

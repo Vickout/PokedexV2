@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as React from "react";
+import { useToast } from "./toastContext";
 
 type TypeProps = {
   name: string;
@@ -22,13 +23,17 @@ const PokemonContext = React.createContext<PokemonContextData>(
 const PokemonTypeProvider = ({ children }: any) => {
   const [types, setTypes] = React.useState<TypeProps[]>([]);
 
+  const { showToast } = useToast();
+
   const handleTypeImage = React.useCallback(async (url: string) => {
     try {
       const response = await axios.get(url);
 
       return response.data.sprites["generation-viii"]["sword-shield"]
         .name_icon as string;
-    } catch (error) {}
+    } catch (error) {
+      showToast("Error to fetch data");
+    }
   }, []);
 
   const handleTypes = React.useCallback(async () => {
@@ -46,7 +51,9 @@ const PokemonTypeProvider = ({ children }: any) => {
       );
 
       setTypes(response);
-    } catch (error) {}
+    } catch (error) {
+      showToast("Error to fetch data");
+    }
   }, []);
 
   React.useEffect(() => {

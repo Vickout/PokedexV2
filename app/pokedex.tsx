@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import PokeHeader from "@/components/PokeHeader";
 import { ThemedText } from "@/components/ThemedText";
+import { useToast } from "@/context/toastContext";
 
 interface PokemonList {
   name: string;
@@ -25,6 +26,8 @@ export default function Pokedex() {
   const [page, setPage] = React.useState<number>(10);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [isVisible, setIsVisible] = React.useState<boolean>(false);
+
+  const { showToast } = useToast();
 
   const throttleRequest = onThrottle(async () => {
     setLoading(true);
@@ -42,6 +45,7 @@ export default function Pokedex() {
       }
     } catch (error) {
       console.log(error);
+      showToast("Error to fetch data");
     } finally {
       setLoading(false);
       setIsVisible(false);
@@ -55,6 +59,7 @@ export default function Pokedex() {
       return response.data;
     } catch (error) {
       console.log(error);
+      showToast("Error to fetch data");
     }
   }, []);
 
@@ -72,6 +77,7 @@ export default function Pokedex() {
       setData(pokemonsInfo);
     } catch (error) {
       console.log(error);
+      showToast("Error to fetch data");
     } finally {
       setIsVisible(false);
     }

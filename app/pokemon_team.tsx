@@ -7,15 +7,21 @@ import { getAll } from "@/databases";
 import { PokemonTeamCard } from "@/components/PokemonTeamCard";
 import { useIsFocused } from "@react-navigation/native";
 import { ThemedText } from "@/components/ThemedText";
+import { useToast } from "@/context/toastContext";
 
 export default function PokemonTeam() {
   const [pokemons, setPokemons] = React.useState<IPokemon[]>([]);
 
+  const { showToast } = useToast();
   const isFocused = useIsFocused();
 
   const hanldeGetPokemons = React.useCallback(async () => {
-    const myPokemons: Array<IPokemon> = await getAll();
-    setPokemons(myPokemons);
+    try {
+      const myPokemons: Array<IPokemon> = await getAll();
+      setPokemons(myPokemons);
+    } catch (error: any) {
+      showToast(error);
+    }
   }, []);
 
   React.useEffect(() => {

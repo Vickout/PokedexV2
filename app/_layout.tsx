@@ -8,6 +8,7 @@ import PokemonStats from "./pokemon_stats";
 import PokemonTeam from "./pokemon_team";
 import Pokedex from "./pokedex";
 import { PokemonTypeProvider } from "@/context/pokemonTypeContext";
+import { ToastProvider } from "@/context/toastContext";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -30,13 +31,15 @@ export default function RootLayout() {
   }
 
   return (
-    <PokemonTypeProvider>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="home" component={Home} />
-        <Stack.Screen name="pokemon_stats" component={PokemonStats} />
-        <Stack.Screen name="pokemon_team" component={PokemonTeam} />
-        <Stack.Screen name="pokedex" component={Pokedex} />
-      </Stack.Navigator>
-    </PokemonTypeProvider>
+    <ToastProvider>
+      <PokemonTypeProvider>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="home" component={Home} />
+          <Stack.Screen name="pokemon_stats" component={PokemonStats} />
+          <Stack.Screen name="pokemon_team" component={PokemonTeam} />
+          <Stack.Screen name="pokedex" component={Pokedex} />
+        </Stack.Navigator>
+      </PokemonTypeProvider>
+    </ToastProvider>
   );
 }
