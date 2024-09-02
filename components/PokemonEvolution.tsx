@@ -21,8 +21,15 @@ export function PokemonEvolution({
       {isEvolution && (
         <Ionicons size={24} name="arrow-down" style={styles.downIcon} />
       )}
-      <View style={[styles.spriteImageContainer, { borderColor: color }]}>
-        <Image source={{ uri: image }} style={styles.spriteImage} />
+      <View
+        testID="sprite_image_container"
+        style={[styles.spriteImageContainer, { borderColor: color }]}
+      >
+        <Image
+          testID="sprite_image"
+          source={{ uri: image }}
+          style={styles.spriteImage}
+        />
       </View>
       <ThemedText>{name}</ThemedText>
     </View>

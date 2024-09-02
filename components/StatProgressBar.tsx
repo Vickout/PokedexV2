@@ -43,6 +43,7 @@ export function StatProgressBar({
       <ThemedText style={styles.statValue}>{base_stat}</ThemedText>
       <View style={styles.progressBarFull}>
         <View
+          testID="progress-bar"
           style={[
             styles.progressBar,
             { width: percentage, backgroundColor: color },
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
   stat: {
     marginRight: 15,
     width: 45,
-    fontWeight: "700"
+    fontWeight: "700",
   },
   statValue: {
     width: 30,

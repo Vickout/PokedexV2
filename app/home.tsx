@@ -11,7 +11,7 @@ import { onThrottle } from "@/hooks/usePerformance";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { PokemonCard } from "@/components/PokemonCard";
-import { NativeStackScreenProps } from "react-native-screens/lib/typescript/native-stack/types";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import PokeInput from "@/components/PokeInput";
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;

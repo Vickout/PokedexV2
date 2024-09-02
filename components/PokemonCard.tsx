@@ -1,19 +1,32 @@
 import * as React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
-import axios from "axios";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { pokemon_type_color } from "@/constants/Colors";
 import { getById } from "@/databases";
 import { capitalize } from "@/hooks/useCapitalize";
+import { usePokemonType } from "@/context/pokemonTypeContext";
 
 type PokemonCardProps = {
   pokemon: IPokemon;
 };
 
 export function PokemonCard({ pokemon }: PokemonCardProps) {
-  const [types, setTypes] = React.useState<string[]>([]);
   const [isMyPokemon, setIsMyPokemon] = React.useState<boolean>(false);
+  const { types } = usePokemonType();
+
+  const imageTypes = React.useMemo(() => {
+    return types
+      .map((type) => {
+        if (
+          pokemon.types.some(
+            (pokemonType) => pokemonType.type.name === type.name
+          )
+        )
+          return type.image;
+      })
+      .filter((type) => type !== undefined);
+  }, [types, pokemon]);
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -29,27 +42,8 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
     return pokemon_type_color[firstColor];
   }, [pokemon.types]);
 
-  const handleTypeImage = React.useCallback(async (url: string) => {
-    try {
-      const response = await axios.get(url);
-
-      return response.data.sprites["generation-viii"]["sword-shield"]
-        .name_icon as string;
-    } catch (error) {}
-  }, []);
-
-  const hanldeTypes = React.useCallback(async () => {
-    const images = await Promise.all(
-      pokemon.types.map(async ({ type }) => {
-        return await handleTypeImage(type.url);
-      })
-    );
-
-    setTypes(images.filter((image) => image !== undefined));
-  }, [handleTypeImage]);
-
   const handlePress = React.useCallback(() => {
-    navigation.navigate("pokemon_stats", { pokemon, imageTypes: types });
+    navigation.navigate("pokemon_stats", { pokemon, imageTypes });
   }, [pokemon, types]);
 
   const hanldeGetPokemon = React.useCallback(async () => {
@@ -64,12 +58,9 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
     hanldeGetPokemon();
   }, []);
 
-  React.useEffect(() => {
-    hanldeTypes();
-  }, []);
-
   return (
     <TouchableOpacity
+      testID="pokemon-card-touchable"
       style={[styles.container, { backgroundColor: typeColor + "aa" }]}
       onPress={handlePress}
     >
@@ -78,8 +69,9 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
           <ThemedText type="defaultSemiBold">{pokemonOrder}</ThemedText>
           <ThemedText type="subtitle">{capitalize(pokemon.name)}</ThemedText>
           <View style={{ flexDirection: "row" }}>
-            {types.map((image) => (
+            {imageTypes.map((image) => (
               <Image
+                testID="type-image"
                 key={String(image)}
                 source={{ uri: image }}
                 style={styles.typeImage}
@@ -88,6 +80,7 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
           </View>
         </View>
         <Image
+          testID="sprite-image"
           source={{ uri: pokemon.sprites.front_default }}
           style={styles.spriteImage}
         />
@@ -98,6 +91,7 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
       />
       <View style={styles.pokeballButton}>
         <Image
+          testID="pokeball-image"
           source={
             isMyPokemon
               ? require("@/assets/images/pokeball.png")

@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import * as React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
@@ -30,6 +29,7 @@ export function PokemonTeamCard({ pokemon }: PokemonTeamCardProps) {
   return (
     <View style={styles.container}>
       <TouchableOpacity
+        testID="button"
         style={styles.pokemonContainer}
         onPress={() =>
           navigation.navigate("pokemon_stats", { pokemon, imageTypes })

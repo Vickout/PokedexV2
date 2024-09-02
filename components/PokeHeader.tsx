@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 
-type PokeHeaderProps = {
+export type PokeHeaderProps = {
   title: string;
 };
 
@@ -12,6 +12,7 @@ export default function PokeHeader({ title }: PokeHeaderProps) {
   return (
     <View style={styles.header}>
       <TouchableOpacity
+        testID="button"
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
