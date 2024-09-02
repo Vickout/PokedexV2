@@ -90,6 +90,7 @@ export default function Pokedex() {
 
   React.useEffect(() => {
     if (!search) {
+      setIsVisible(true);
       debounceRequest();
     }
   }, [page, search]);
@@ -108,7 +109,7 @@ export default function Pokedex() {
               onEndReachedThreshold={0.4}
               onEndReached={() => {
                 setPage((prev) => prev + 10);
-                setIsVisible(true);
+                data.length > 1 && setIsVisible(true);
               }}
               keyExtractor={(item) => String(item.id)}
               renderItem={({ item }) => {

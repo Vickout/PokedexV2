@@ -1,18 +1,19 @@
-import React, {useEffect, useRef} from 'react';
-import {Animated, Dimensions, StyleSheet, Text, View} from 'react-native';
+import React, { useEffect, useRef } from "react";
+import { Animated, Dimensions, StyleSheet, View } from "react-native";
+import { ThemedText } from "./ThemedText";
 
 interface IToastCustomError {
   text: string | undefined;
   visibilityTime: number;
-  type?: 'success' | 'warning';
+  type?: "success" | "warning";
 }
 
 export default function ToastCustomError({
   text,
   visibilityTime,
-  type = 'warning',
+  type = "warning",
 }: IToastCustomError) {
-  const height = Dimensions.get('window').height;
+  const height = Dimensions.get("window").height;
 
   const slideAnim = useRef(new Animated.Value(height * -1)).current;
 
@@ -35,43 +36,40 @@ export default function ToastCustomError({
   }, [slideAnim, visibilityTime]);
 
   return (
-    <Animated.View style={[styles.toastContainer, {top: slideAnim}]}>
+    <Animated.View style={[styles.toastContainer, { top: slideAnim }]}>
       <View
         style={[
           styles.toastErrorCircle,
-          type === 'success' && {backgroundColor: '#00C971'},
+          type === "success" && { backgroundColor: "#00C971" },
         ]}
       />
-      <Text style={styles.toastText}>{text}</Text>
+      <ThemedText style={styles.toastText}>{text}</ThemedText>
     </Animated.View>
   );
-};
+}
 
-const styles  = StyleSheet.create({
+const styles = StyleSheet.create({
   toastContainer: {
     minHeight: 56,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 8,
     marginHorizontal: 40,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
-    position: 'absolute',
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+    position: "absolute",
     zIndex: 1,
   },
   toastErrorCircle: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: 'red',
+    backgroundColor: "red",
     marginRight: 10,
   },
   toastText: {
-    fontFamily: 'VWHead',
-    fontSize: 16,
-    lineHeight: 20,
-    color: 'white',
+    color: "white",
   },
 });
