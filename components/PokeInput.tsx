@@ -10,7 +10,7 @@ export default function PokeInput({
     <View style={styles.inputContainer}>
       <Ionicons size={24} name="search" style={styles.searchIcon} />
       <TextInput
-        placeholder="Buscar pokémon..."
+        placeholder="Search for Pokémon..."
         value={value}
         onChangeText={onChangeText}
         style={styles.input}

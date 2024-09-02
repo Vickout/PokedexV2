@@ -2,18 +2,12 @@ import * as React from "react";
 import {
   Image,
   StyleSheet,
-  Platform,
   TouchableOpacity,
   View,
-  TextInput,
-  FlatList,
+  ActivityIndicator,
 } from "react-native";
-import axios, { AxiosResponse } from "axios";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { FlashList } from "@shopify/flash-list";
-
-import { onThrottle, onDebounce } from "@/hooks/usePerformance";
-
+import axios from "axios";
+import { onThrottle } from "@/hooks/usePerformance";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { PokemonCard } from "@/components/PokemonCard";
@@ -24,9 +18,11 @@ type Props = NativeStackScreenProps<RootStackParamList, "home">;
 
 export default function Home({ navigation }: Props) {
   const [search, setSearch] = React.useState<string>("");
-  const [data, setData] = React.useState<IPokemon[]>([]);
+  const [data, setData] = React.useState<IPokemon>({} as IPokemon);
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   const throttleRequest = onThrottle(async () => {
+    setLoading(true);
     try {
       const param = String(search).toLowerCase();
 
@@ -35,10 +31,14 @@ export default function Home({ navigation }: Props) {
       );
 
       if (response.data.name) {
-        setData([response.data]);
+        setData(response.data);
+      } else {
+        setData({} as IPokemon);
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   });
 
@@ -49,31 +49,45 @@ export default function Home({ navigation }: Props) {
 
   return (
     <ThemedView style={styles.container}>
+      <Image
+        source={require("@/assets/images/pokemon_logo.png")}
+        style={styles.logo}
+      />
       <ThemedText type="title">
-        O que você quer saber sobre os Pokémons?
+        What do you want to know about Pokémon?
       </ThemedText>
       <PokeInput value={search} onChangeText={handlePokemonSearch} />
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          width: "100%",
-        }}
-      >
-        <TouchableOpacity
-          style={[styles.button, { width: "40%", backgroundColor: "green" }]}
-          onPress={() => navigation.navigate("pokemon_team")}
-        >
-          <ThemedText style={styles.buttonText}>My team</ThemedText>
-        </TouchableOpacity>
+      {loading ? (
+        <ActivityIndicator />
+      ) : Object.keys(data).length ? (
+        <PokemonCard pokemon={data} />
+      ) : (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, { width: "40%", backgroundColor: "green" }]}
+            onPress={() => navigation.navigate("pokemon_team")}
+          >
+            <Image
+              source={require("@/assets/images/gaming.png")}
+              style={styles.buttonImage}
+            />
+            <ThemedText style={[styles.buttonText, { width: 50 }]}>
+              My team
+            </ThemedText>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, { width: "55%", backgroundColor: "blue" }]}
-          onPress={() => navigation.navigate("pokedex")}
-        >
-          <ThemedText style={styles.buttonText}>Pokedex</ThemedText>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={[styles.button, { width: "55%", backgroundColor: "blue" }]}
+            onPress={() => navigation.navigate("pokedex")}
+          >
+            <Image
+              source={require("@/assets/images/avatar-2.png")}
+              style={styles.buttonImage}
+            />
+            <ThemedText style={styles.buttonText}>Pokedex</ThemedText>
+          </TouchableOpacity>
+        </View>
+      )}
     </ThemedView>
   );
 }
@@ -82,18 +96,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 100,
+    paddingTop: 64,
+  },
+  logo: {
+    height: 64,
+    width: 180,
+    alignSelf: "center",
+    marginTop: 20,
+    marginBottom: 42,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
   button: {
-    height: 64,
+    height: 72,
     borderRadius: 8,
     alignItems: "flex-end",
     justifyContent: "flex-end",
-    padding: 8
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    overflow: "hidden",
   },
   buttonText: {
     fontSize: 20,
-    color: 'white',
-    fontWeight: "700"
+    color: "white",
+    fontWeight: "700",
+    textAlign: "right",
+  },
+  buttonImage: {
+    width: 70,
+    height: 70,
+    position: "absolute",
+    top: 0,
+    left: 10,
+    opacity: 0.6,
   },
 });

@@ -17,10 +17,30 @@ export function StatProgressBar({
     return `${(base_stat / 255) * 100}%` as DimensionValue;
   }, [base_stat]);
 
+  const statLabel = React.useMemo(() => {
+    switch (name) {
+      case "hp":
+        return "HP";
+      case "attack":
+        return "ATK";
+      case "defense":
+        return "DEF";
+      case "special-attack":
+        return "SATK";
+      case "special-defense":
+        return "SDEF";
+      case "speed":
+        return "SPD";
+
+      default:
+        break;
+    }
+  }, [name]);
+
   return (
     <View style={styles.progressBarContainer}>
-      <ThemedText style={styles.stat}>{name}</ThemedText>
-      <ThemedText>{base_stat}</ThemedText>
+      <ThemedText style={styles.stat}>{statLabel}</ThemedText>
+      <ThemedText style={styles.statValue}>{base_stat}</ThemedText>
       <View style={styles.progressBarFull}>
         <View
           style={[
@@ -41,6 +61,11 @@ const styles = StyleSheet.create({
   },
   stat: {
     marginRight: 15,
+    width: 45,
+    fontWeight: "700"
+  },
+  statValue: {
+    width: 30,
   },
   progressBarFull: {
     flex: 1,

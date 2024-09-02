@@ -7,16 +7,15 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  FlatList,
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as React from "react";
-import { pokemon_type_color, PokemonTypeColorProps } from "@/constants/Colors";
+import { pokemon_type_color } from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { capitalize } from "@/hooks/useCapitalize";
 import axios from "axios";
-import { FlashList } from "@shopify/flash-list";
 import { PokemonEvolution } from "@/components/PokemonEvolution";
+import { add, remove, getById } from "@/databases";
 
 type Props = NativeStackScreenProps<RootStackParamList, "pokemon_stats">;
 
@@ -43,6 +42,7 @@ export default function PokemonStats({ route, navigation }: Props) {
   const [infoSelected, setInfoSelected] = React.useState<InfoProps>("stats");
   const [about, setAbout] = React.useState<string>("");
   const [evolutions, setEvolutions] = React.useState<EvolutionProps[]>([]);
+  const [isMyPokemon, setIsMyPokemon] = React.useState<boolean>(false);
 
   const pokemon = React.useMemo(() => {
     return { ...route.params.pokemon, imageTypes: route.params.imageTypes };
@@ -55,6 +55,10 @@ export default function PokemonStats({ route, navigation }: Props) {
       { name: "Moves", id: "moves" },
     ] as InfoHeaderProps[];
   }, [infoSelected]);
+
+  const formattedAbout = React.useMemo(() => {
+    return about.replace(/\s+/g, " ").trim();
+  }, [about]);
 
   const typeColor = React.useMemo(() => {
     const firstColor = Object.keys(pokemon_type_color).find(
@@ -117,7 +121,7 @@ export default function PokemonStats({ route, navigation }: Props) {
         }
 
         const evolutionChain = await Promise.all(
-          evolutionData.data.chain.evolves_to.map(async (evolve) => {
+          evolutionData.data.chain.evolves_to.map(async (evolve: any) => {
             const evolution = await handleEvolution(evolve.species.name);
 
             if (evolution !== undefined) {
@@ -125,7 +129,7 @@ export default function PokemonStats({ route, navigation }: Props) {
 
               if (!!evolve.evolves_to.length) {
                 evolves_to = await Promise.all(
-                  evolve.evolves_to.map(async (nextEvolve) => {
+                  evolve.evolves_to.map(async (nextEvolve: any) => {
                     const nextEvolution = await handleEvolution(
                       nextEvolve.species.name
                     );
@@ -163,7 +167,29 @@ export default function PokemonStats({ route, navigation }: Props) {
       console.log(error);
     }
   }, []);
-  console.log(JSON.stringify(evolutions));
+
+  const hanldeAddPokemon = React.useCallback(async () => {
+    await add(pokemon);
+    setIsMyPokemon(true);
+  }, [pokemon]);
+
+  const hanldeDeletePokemon = React.useCallback(async () => {
+    await remove(pokemon.id);
+    setIsMyPokemon(false);
+  }, [pokemon]);
+
+  const hanldeGetPokemon = React.useCallback(async () => {
+    const myPokemon = await getById(pokemon.id);
+
+    if (myPokemon !== null && myPokemon !== undefined) {
+      setIsMyPokemon(true);
+    }
+  }, [pokemon]);
+
+  React.useEffect(() => {
+    hanldeGetPokemon();
+  }, []);
+
   React.useEffect(() => {
     handleSpecies(pokemon.species.url);
   }, [pokemon.species.url]);
@@ -177,16 +203,28 @@ export default function PokemonStats({ route, navigation }: Props) {
           <Ionicons size={24} name="chevron-back" style={styles.backIcon} />
         </TouchableOpacity>
       </View>
-      <View>
-        <TouchableOpacity>
+      <View
+        style={{
+          position: "absolute",
+          top: 56,
+          right: 20,
+          zIndex: 1,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            isMyPokemon ? hanldeDeletePokemon() : hanldeAddPokemon();
+          }}
+        >
           <Image
-            source={require("@/assets/images/pokeball-2.png")}
+            source={
+              isMyPokemon
+                ? require("@/assets/images/pokeball.png")
+                : require("@/assets/images/pokeball-2.png")
+            }
             style={{
               width: 48,
               height: 48,
-              position: "absolute",
-              top: 56,
-              right: 20,
             }}
           />
         </TouchableOpacity>
@@ -276,41 +314,61 @@ export default function PokemonStats({ route, navigation }: Props) {
                   }
                 />
               ))}
-              <ThemedText>{about}</ThemedText>
+
+              <ThemedText
+                type="subtitle"
+                style={[styles.aboutTitle, { color: typeColor }]}
+              >
+                About
+              </ThemedText>
+              <ThemedText style={styles.about}>{formattedAbout}</ThemedText>
             </>
           )}
-          {infoSelected === "evolution" &&
-            evolutions.map((evolution) => (
-              <>
-                <PokemonEvolution
-                  name={evolution.species.name}
-                  image={evolution.species.image}
-                  color={typeColor}
-                />
-                {evolution.evolves_to.map((evolve) => (
-                  <>
+          {infoSelected === "evolution" && (
+            <>
+              {evolutions.length ? (
+                evolutions.map((evolution) => (
+                  <View key={evolution.species.name}>
                     <PokemonEvolution
-                      name={evolve.name}
-                      image={evolve.image}
+                      key={evolution.species.name}
+                      name={evolution.species.name}
+                      image={evolution.species.image}
                       color={typeColor}
-                      isEvolution
                     />
-                    {evolve.evolves_to.map((nextEvolve) => (
-                      <PokemonEvolution
-                        name={nextEvolve.name}
-                        image={nextEvolve.image}
-                        color={typeColor}
-                        isEvolution
-                      />
+                    {evolution.evolves_to.map((evolve) => (
+                      <View key={evolve.name}>
+                        <PokemonEvolution
+                          name={evolve.name}
+                          image={evolve.image}
+                          color={typeColor}
+                          isEvolution
+                        />
+                        {evolve.evolves_to.map((nextEvolve) => (
+                          <PokemonEvolution
+                            key={nextEvolve.name}
+                            name={nextEvolve.name}
+                            image={nextEvolve.image}
+                            color={typeColor}
+                            isEvolution
+                          />
+                        ))}
+                      </View>
                     ))}
-                  </>
-                ))}
-              </>
-            ))}
+                  </View>
+                ))
+              ) : (
+                <View style={styles.noEvolutionContainer}>
+                  <ThemedText type="subtitle" style={{}}>
+                    No evolutions
+                  </ThemedText>
+                </View>
+              )}
+            </>
+          )}
 
           {infoSelected === "moves" &&
             pokemon.moves.map((move) => (
-              <View key={String(move.move.name)}>
+              <View key={String(move.move.name)} style={styles.moveContainer}>
                 <ThemedText>{capitalize(move.move.name)}</ThemedText>
               </View>
             ))}
@@ -403,5 +461,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginBottom: 24,
+  },
+  noEvolutionContainer: {
+    alignItems: "center",
+    paddingTop: 32,
+  },
+  aboutTitle: {
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  about: {
+    textAlign: "justify",
+  },
+  moveContainer: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#b8b8b8",
   },
 });
